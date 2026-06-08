@@ -1,0 +1,1106 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --font: 'DM Sans', 'Segoe UI', sans-serif;
+    --primary: #1a56db;
+    --primary-light: #e8effd;
+    --success: #0f9e5e;
+    --success-light: #d1f5e4;
+    --danger: #e02424;
+    --danger-light: #fde8e8;
+    --warn: #c27803;
+    --warn-light: #fdf6b2;
+    --gray0: #f9fafb;
+    --gray1: #f3f4f6;
+    --gray2: #e5e7eb;
+    --gray3: #d1d5db;
+    --gray4: #9ca3af;
+    --gray5: #6b7280;
+    --gray6: #374151;
+    --gray7: #1f2937;
+    --gray8: #111827;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.09);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06);
+    --sidebar-w: 220px;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+  body { font-family: var(--font); background: var(--bg); color: var(--gray7); min-height: 100vh; font-size: 14px; }
+  .hidden { display: none !important; }
+
+  /* --- Auth Screen --- */
+  #auth-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f1f5c 0%, #1a3a8f 60%, #2563eb 100%);
+    padding: 2rem;
+  }
+  .auth-card {
+    background: white; border-radius: 20px; padding: 2.5rem;
+    width: 100%; max-width: 400px; box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  }
+  .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .auth-logo-icon {
+    width: 40px; height: 40px; background: #1a56db; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .auth-logo-icon svg { color: white; }
+  .auth-logo-text { font-size: 18px; font-weight: 700; color: var(--gray8); }
+  .auth-logo-sub { font-size: 12px; color: var(--gray5); font-weight: 400; }
+  .auth-tabs { display: flex; background: var(--gray1); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 1.5rem; }
+  .auth-tab {
+    flex: 1; text-align: center; padding: 8px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--gray5); transition: all 0.2s;
+  }
+  .auth-tab.active { background: white; color: var(--gray8); box-shadow: var(--shadow); }
+  .form-group { margin-bottom: 1rem; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray6); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-input {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 14px; color: var(--gray8); background: var(--gray0);
+    transition: border-color 0.2s; outline: none;
+  }
+  .form-input:focus { border-color: var(--primary); background: white; }
+  .form-select {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 14px; color: var(--gray8); background: var(--gray0);
+    outline: none; cursor: pointer;
+  }
+  .btn-primary {
+    width: 100%; padding: 12px; background: var(--primary); color: white; border: none;
+    border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.2s; margin-top: 0.5rem;
+  }
+  .btn-primary:hover { background: #1546bf; }
+  .auth-hint { font-size: 12px; color: var(--gray4); text-align: center; margin-top: 1rem; }
+  .auth-error { font-size: 13px; color: var(--danger); background: var(--danger-light); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 1rem; }
+
+  /* --- Main App --- */
+  #app { display: none; min-height: 100vh; flex-direction: column; }
+  .topbar {
+    background: white; border-bottom: 1px solid var(--border); padding: 0 2rem;
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-brand-icon {
+    width: 30px; height: 30px; background: var(--primary); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .topbar-brand-name { font-size: 15px; font-weight: 700; color: var(--gray8); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-clock { font-size: 13px; font-weight: 600; color: var(--gray6); background: var(--gray1); padding: 5px 12px; border-radius: 20px; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+  }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--gray7); }
+  .user-role { font-size: 11px; color: var(--gray4); }
+  .btn-logout {
+    padding: 6px 14px; border: 1.5px solid var(--gray2); background: white; color: var(--gray6);
+    border-radius: var(--radius-sm); font-family: var(--font); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  .main-layout { display: flex; flex: 1; }
+  .sidebar {
+    width: var(--sidebar-w); background: white; border-right: 1px solid var(--border);
+    padding: 1.25rem 0.75rem; display: flex; flex-direction: column; gap: 2px;
+    position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
+    font-size: 13px; font-weight: 500; color: var(--gray5);
+  }
+  .nav-item:hover { background: var(--gray0); color: var(--gray7); }
+  .nav-item.active { background: var(--primary-light); color: var(--primary); }
+  .nav-item svg { flex-shrink: 0; }
+  .nav-section { font-size: 10px; font-weight: 700; color: var(--gray4); text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 12px 4px; }
+  .page { flex: 1; padding: 2rem; }
+  .page-header { margin-bottom: 1.75rem; }
+  .page-title { font-size: 22px; font-weight: 700; color: var(--gray8); margin-bottom: 4px; }
+  .page-subtitle { font-size: 14px; color: var(--gray5); }
+  .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem; box-shadow: var(--shadow); }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--gray7); margin-bottom: 1rem; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.1rem 1.25rem; box-shadow: var(--shadow); }
+  .stat-label { font-size: 11px; font-weight: 600; color: var(--gray4); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--gray8); line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--gray5); margin-top: 4px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge-success { background: var(--success-light); color: var(--success); }
+  .badge-danger { background: var(--danger-light); color: var(--danger); }
+  .badge-warn { background: var(--warn-light); color: var(--warn); }
+  .badge-gray { background: var(--gray1); color: var(--gray5); }
+  .badge-blue { background: var(--primary-light); color: var(--primary); }
+
+  /* Attendance mark widget */
+  .attend-widget {
+    background: linear-gradient(135deg, #1a56db 0%, #1546bf 100%);
+    border-radius: var(--radius); padding: 2rem; color: white; margin-bottom: 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .attend-widget::after {
+    content: ''; position: absolute; right: -30px; top: -30px;
+    width: 160px; height: 160px; border-radius: 50%; background: rgba(255,255,255,0.07);
+  }
+  .attend-widget::before {
+    content: ''; position: absolute; right: 60px; bottom: -50px;
+    width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.05);
+  }
+  .attend-time { font-size: 42px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+  .attend-date { font-size: 14px; opacity: 0.7; margin-top: 4px; margin-bottom: 1.5rem; }
+  .attend-status { font-size: 13px; opacity: 0.85; margin-top: 0.75rem; }
+  .btn-mark {
+    padding: 12px 28px; background: white; color: var(--primary); border: none;
+    border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; position: relative; z-index: 1;
+  }
+  .btn-mark:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .btn-mark:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-mark.already { background: var(--success-light); color: var(--success); }
+  .btn-mark.closed { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); }
+
+  /* Request form */
+  .req-form { display: grid; gap: 1rem; }
+  .btn-secondary {
+    padding: 10px 20px; background: var(--primary); color: white; border: none;
+    border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: #1546bf; }
+  .textarea {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 14px; color: var(--gray8); resize: vertical; min-height: 80px;
+    outline: none; background: var(--gray0);
+  }
+  .textarea:focus { border-color: var(--primary); background: white; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 700; color: var(--gray4); text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--gray2); }
+  td { padding: 10px 12px; font-size: 13px; color: var(--gray7); border-bottom: 1px solid var(--gray1); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray0); }
+  .emp-row { display: flex; align-items: center; gap: 8px; }
+  .emp-av { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+  /* Chart container */
+  .chart-area { position: relative; width: 100%; height: 220px; }
+
+  /* Admin request cards */
+  .req-card { border: 1px solid var(--gray2); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .req-info { flex: 1; min-width: 0; }
+  .req-name { font-size: 13px; font-weight: 600; color: var(--gray8); }
+  .req-meta { font-size: 12px; color: var(--gray5); margin-top: 2px; }
+  .req-reason { font-size: 12px; color: var(--gray6); margin-top: 4px; font-style: italic; }
+  .req-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-approve { padding: 6px 14px; background: var(--success-light); color: var(--success); border: 1px solid #b2eed6; border-radius: 6px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn-approve:hover { background: #c1f3de; }
+  .btn-reject { padding: 6px 14px; background: var(--danger-light); color: var(--danger); border: 1px solid #f5c2c2; border-radius: 6px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn-reject:hover { background: #fdd1d1; }
+  .empty-state { text-align: center; padding: 2rem; color: var(--gray4); font-size: 14px; }
+  .success-msg { background: var(--success-light); color: var(--success); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; font-weight: 500; margin-top: 0.75rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .filter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-label { font-size: 12px; font-weight: 600; color: var(--gray5); }
+  .filter-select { padding: 6px 10px; border: 1px solid var(--gray2); border-radius: 6px; font-family: var(--font); font-size: 13px; color: var(--gray7); background: white; cursor: pointer; }
+  .today-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .window-bar { background: var(--warn-light); border: 1px solid #fcd97a; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--warn); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .sidebar { width: 180px; }
+    .page { padding: 1rem; }
+    .attend-time { font-size: 32px; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg width="22" height="22" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      </div>
+      <div>
+        <div class="auth-logo-text">AttendSync</div>
+        <div class="auth-logo-sub">Employee Attendance Portal</div>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('employee')">Employee</div>
+      <div class="auth-tab" onclick="switchAuthTab('admin')">Admin</div>
+    </div>
+    <div id="auth-error" class="auth-error hidden"></div>
+    <div class="form-group">
+      <label class="form-label">Employee ID / Username</label>
+      <input class="form-input" id="auth-user" type="text" placeholder="e.g. EMP001 or admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="auth-pass" type="password" placeholder="Enter your password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In</button>
+    <div class="auth-hint" id="auth-hint">Demo: Use any employee ID + password "1234" &bull; Admin: "admin" + "admin123"</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app" style="display:none; flex-direction:column;">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-brand-icon">
+        <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <span class="topbar-brand-name">AttendSync</span>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-clock" id="live-clock">--:-- --</div>
+      <div class="topbar-user">
+        <div class="user-avatar" id="top-avatar">?</div>
+        <div>
+          <div class="user-name" id="top-name">-</div>
+          <div class="user-role" id="top-role">-</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="main-layout">
+    <div class="sidebar" id="sidebar">
+      <!-- Filled by JS -->
+    </div>
+    <div class="page" id="page-content">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+"use strict";
+
+/* ============================================================
+   DATA STORE
+============================================================ */
+const DB = {
+  employees: [
+    { id:'EMP001', name:'Priyanshu Goyal',    role:'employee', pass:'1234', joined:'2024-01-10' },
+    { id:'EMP002', name:'Priyanshu Bisht',    role:'employee', pass:'1234', joined:'2024-02-15' },
+    { id:'EMP003', name:'Sufiyan',           role:'employee', pass:'1234', joined:'2023-11-01' },
+    { id:'EMP004', name:'Shaurya Singh',     role:'employee', pass:'1234', joined:'2024-03-20' },
+    { id:'EMP005', name:'Himanshi',          role:'employee', pass:'1234', joined:'2024-01-05' },
+    { id:'admin',  name:'Priyam Goyal',       role:'admin',    pass:'admin123', joined:'2022-01-01' },
+  ],
+  attendance: generatePastAttendance(),
+  requests: [],
+};
+
+function generatePastAttendance() {
+  const records = [];
+  const now = new Date();
+  const emps = ['EMP001','EMP002','EMP003','EMP004','EMP005','EMP006','EMP007','EMP008'];
+  for (let d = 13; d >= 1; d--) {
+    const day = new Date(now);
+    day.setDate(now.getDate() - d);
+    if (day.getDay() === 0 || day.getDay() === 6) continue;
+    const dateStr = fmtDate(day);
+    emps.forEach(id => {
+      const chance = Math.random();
+      if (chance < 0.08) return;
+      const isLate = Math.random() < 0.25;
+      const hr = isLate ? (10 + Math.floor(Math.random() * 2)) : (8 + Math.floor(Math.random() * 2));
+      const min = Math.floor(Math.random() * 59);
+      const timeStr = `${String(hr).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+      records.push({ empId: id, date: dateStr, time: timeStr, status: isLate ? 'late' : 'present', method: 'self' });
+    });
+  }
+  return records;
+}
+
+function fmtDate(d) { return d.toISOString().slice(0,10); }
+function fmtTime(d) { return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+function todayStr() { return fmtDate(new Date()); }
+
+const CUTOFF = { h: 10, m: 30 };
+
+function isBeforeCutoff(d) {
+  return d.getHours() < CUTOFF.h || (d.getHours() === CUTOFF.h && d.getMinutes() <= CUTOFF.m);
+}
+
+function getAttendance(empId, date) {
+  return DB.attendance.find(r => r.empId === empId && r.date === date);
+}
+
+function getWeekDates() {
+  const dates = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    if (d.getDay() !== 0 && d.getDay() !== 6) dates.push(fmtDate(d));
+  }
+  return dates;
+}
+
+/* ============================================================
+   AUTH
+============================================================ */
+let currentUser = null;
+let authMode = 'employee';
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i === 0 && mode === 'employee') || (i === 1 && mode === 'admin'));
+  });
+  document.getElementById('auth-hint').textContent = mode === 'admin'
+    ? 'Admin login: username "admin", password "admin123"'
+    : 'Demo: Use any employee ID + password "1234"';
+  document.getElementById('auth-error').classList.add('hidden');
+}
+
+function doLogin() {
+  const uid = document.getElementById('auth-user').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.classList.add('hidden');
+  const emp = DB.employees.find(e => e.id === uid);
+  if (!emp || emp.pass !== pass) {
+    errEl.textContent = 'Invalid credentials. Please try again.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (authMode === 'admin' && emp.role !== 'admin') {
+    errEl.textContent = 'This account does not have admin access.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (authMode === 'employee' && emp.role === 'admin') {
+    errEl.textContent = 'Please use the Admin tab to log in.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  currentUser = emp;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-user').value = '';
+  document.getElementById('auth-pass').value = '';
+  document.getElementById('auth-error').classList.add('hidden');
+  if (clockInterval) clearInterval(clockInterval);
+}
+
+/* ============================================================
+   CLOCK
+============================================================ */
+let clockInterval = null;
+function startClock() {
+  function tick() {
+    const now = new Date();
+    let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('live-clock').textContent = `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} ${ampm}`;
+  }
+  tick();
+  clockInterval = setInterval(tick, 1000);
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+let currentPage = null;
+
+const empNavItems = [
+  { id:'dashboard',  icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`, label:'Dashboard' },
+  { id:'mark',       icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>`, label:'Mark Attendance' },
+  { id:'history',    icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`, label:'My History' },
+  { id:'request',    icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`, label:'Request Approval' },
+];
+
+const adminNavItems = [
+  { id:'admin-dashboard', icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`, label:'Dashboard' },
+  { id:'admin-employees', icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`, label:'Employees' },
+  { id:'admin-requests',  icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`, label:'Requests' },
+  { id:'admin-reports',   icon:`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`, label:'Reports' },
+];
+
+function initApp() {
+  const u = currentUser;
+  document.getElementById('top-avatar').textContent = initials(u.name);
+  document.getElementById('top-name').textContent = u.name;
+  document.getElementById('top-role').textContent = u.role === 'admin' ? 'Administrator' : u.id;
+  buildSidebar();
+  startClock();
+  const defaultPage = u.role === 'admin' ? 'admin-dashboard' : 'dashboard';
+  navigateTo(defaultPage);
+}
+
+function initials(name) {
+  return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+}
+
+function buildSidebar() {
+  const items = currentUser.role === 'admin' ? adminNavItems : empNavItems;
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '<div class="nav-section">Menu</div>' + items.map(item =>
+    `<div class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">${item.icon}<span>${item.label}</span></div>`
+  ).join('');
+  if (currentUser.role === 'employee') {
+    const pendingReqs = DB.requests.filter(r => r.empId === currentUser.id && r.status === 'pending').length;
+    if (pendingReqs > 0) {
+      const reqNav = document.getElementById('nav-request');
+      if (reqNav) reqNav.innerHTML += ` <span style="margin-left:auto;background:var(--warn);color:white;border-radius:12px;padding:1px 7px;font-size:10px;">${pendingReqs}</span>`;
+    }
+  }
+}
+
+function navigateTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-'+page);
+  if (navEl) navEl.classList.add('active');
+  const pc = document.getElementById('page-content');
+  const pages = {
+    'dashboard':        renderEmployeeDashboard,
+    'mark':             renderMarkAttendance,
+    'history':          renderHistory,
+    'request':          renderRequest,
+    'admin-dashboard':  renderAdminDashboard,
+    'admin-employees':  renderAdminEmployees,
+    'admin-requests':   renderAdminRequests,
+    'admin-reports':    renderAdminReports,
+  };
+  pc.innerHTML = '';
+  if (pages[page]) pages[page](pc);
+}
+
+/* ============================================================
+   EMPLOYEE PAGES
+============================================================ */
+function renderEmployeeDashboard(el) {
+  const emp = currentUser;
+  const today = todayStr();
+  const todayRec = getAttendance(emp.id, today);
+  const weekDates = getWeekDates();
+  const weekRecs = weekDates.map(d => ({ date:d, rec: getAttendance(emp.id, d) }));
+  const presentDays = weekRecs.filter(x => x.rec).length;
+  const lateDays = weekRecs.filter(x => x.rec && x.rec.status === 'late').length;
+  const pendingReqs = DB.requests.filter(r => r.empId === emp.id && r.status === 'pending').length;
+  const myReqs = DB.requests.filter(r => r.empId === emp.id);
+
+  const todayStatusBadge = todayRec
+    ? (todayRec.status === 'late' ? '<span class="badge badge-warn">Late</span>' : '<span class="badge badge-success">Present</span>')
+    : '<span class="badge badge-gray">Not Marked</span>';
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Good ${greeting()}, ${emp.name.split(' ')[0]} 👋</div>
+      <div class="page-subtitle">Here's your attendance overview for this week</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Today's Status</div>
+        <div style="margin-top:6px">${todayStatusBadge}</div>
+        <div class="stat-sub">${todayRec ? 'Marked at '+todayRec.time : 'Not yet marked'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This Week</div>
+        <div class="stat-value">${presentDays}<span style="font-size:16px;color:var(--gray4)">/${weekDates.length}</span></div>
+        <div class="stat-sub">Days present</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Late Arrivals</div>
+        <div class="stat-value" style="color:${lateDays>0?'var(--warn)':'var(--gray8)'}">${lateDays}</div>
+        <div class="stat-sub">This week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Requests</div>
+        <div class="stat-value" style="color:${pendingReqs>0?'var(--primary)':'var(--gray8)'}">${pendingReqs}</div>
+        <div class="stat-sub">Awaiting approval</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">This Week's Attendance</div>
+        <div class="chart-area"><canvas id="weekChart" role="img" aria-label="Weekly attendance chart">Attendance this week: ${presentDays} of ${weekDates.length} days present.</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Requests</div>
+        <div id="dash-reqs"></div>
+      </div>
+    </div>
+  `;
+
+  // Week chart
+  const labels = weekDates.map(d => {
+    const dt = new Date(d+'T00:00:00');
+    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+  });
+  const vals = weekDates.map(d => {
+    const r = getAttendance(emp.id, d);
+    if (!r) return 0;
+    return r.status === 'late' ? 0.5 : 1;
+  });
+  const colors = vals.map(v => v === 1 ? '#0f9e5e' : v === 0.5 ? '#c27803' : '#e5e7eb');
+  new Chart(document.getElementById('weekChart'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderRadius: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 1, ticks: { callback: v => v===1?'Present':v===0.5?'Late':'Absent', stepSize: 0.5 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Recent requests
+  const reqsEl = document.getElementById('dash-reqs');
+  if (myReqs.length === 0) {
+    reqsEl.innerHTML = '<div class="empty-state">No requests submitted yet</div>';
+  } else {
+    reqsEl.innerHTML = myReqs.slice(-4).reverse().map(r => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray1);">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--gray7)">${r.date}</div>
+          <div style="font-size:12px;color:var(--gray5)">${r.reason||'No reason given'}</div>
+        </div>
+        <span class="badge ${r.status==='approved'?'badge-success':r.status==='rejected'?'badge-danger':'badge-warn'}">${cap(r.status)}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function renderMarkAttendance(el) {
+  const now = new Date();
+  const today = todayStr();
+  const existing = getAttendance(currentUser.id, today);
+  const before = isBeforeCutoff(now);
+  const weekDates = getWeekDates();
+
+  const pendingReq = DB.requests.find(r => r.empId === currentUser.id && r.date === today);
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Mark Attendance</div>
+      <div class="page-subtitle">${fmtDateHuman(today)}</div>
+    </div>
+    <div class="attend-widget">
+      <div class="attend-time" id="attend-clock">--:-- --</div>
+      <div class="attend-date">${fmtDateHuman(today)}</div>
+      ${existing
+        ? `<button class="btn-mark already" disabled>✓ Attendance Marked at ${existing.time}</button>
+           <div class="attend-status">Status: ${existing.status === 'late' ? '⚠ Marked as Late' : '✓ On Time'}</div>`
+        : before
+          ? `<button class="btn-mark" onclick="markNow()" id="markBtn">Mark My Attendance</button>
+             <div class="attend-status">Window open until 10:30 AM · Mark now to be on time</div>`
+          : pendingReq
+            ? `<button class="btn-mark closed" disabled>Window Closed · Request Pending</button>
+               <div class="attend-status">Your approval request is awaiting admin review</div>`
+            : `<button class="btn-mark closed" onclick="navigateTo('request')">Window Closed · Request Approval →</button>
+               <div class="attend-status">The 10:30 AM attendance window has closed</div>`
+      }
+    </div>
+    ${!before && !existing ? `<div class="window-bar">⚠ The attendance marking window closed at 10:30 AM. Please submit a request to the admin for manual approval.</div>` : ''}
+    <div class="card">
+      <div class="card-title">This Week's Log</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Day</th><th>Time In</th><th>Status</th></tr></thead>
+          <tbody>
+            ${weekDates.map(d => {
+              const r = getAttendance(currentUser.id, d);
+              const dt = new Date(d+'T00:00:00');
+              const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+              return `<tr>
+                <td>${d}</td><td>${dayName}</td>
+                <td>${r ? r.time : '<span style="color:var(--gray4)">—</span>'}</td>
+                <td>${r ? `<span class="badge ${r.status==='late'?'badge-warn':'badge-success'}">${cap(r.status)}</span>` : '<span class="badge badge-gray">Absent</span>'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  tickAttendClock();
+  setInterval(tickAttendClock, 1000);
+}
+
+function tickAttendClock() {
+  const el = document.getElementById('attend-clock');
+  if (!el) return;
+  const now = new Date();
+  let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  el.textContent = `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} ${ampm}`;
+}
+
+function markNow() {
+  const now = new Date();
+  const today = todayStr();
+  if (getAttendance(currentUser.id, today)) return;
+  const time = fmtTime(now);
+  const isLate = !isBeforeCutoff(now);
+  DB.attendance.push({ empId: currentUser.id, date: today, time, status: isLate ? 'late' : 'present', method: 'self' });
+  navigateTo('mark');
+}
+
+function renderHistory(el) {
+  const emp = currentUser;
+  const allRecs = DB.attendance.filter(r => r.empId === emp.id).sort((a,b) => b.date.localeCompare(a.date));
+  const weekDates = getWeekDates();
+  const monthRecs = allRecs.slice(0, 20);
+
+  const totalPresent = allRecs.filter(r => r.status !== 'absent').length;
+  const totalLate = allRecs.filter(r => r.status === 'late').length;
+  const attendRate = allRecs.length ? Math.round((totalPresent / (allRecs.length + 2)) * 100) : 0;
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">My Attendance History</div>
+      <div class="page-subtitle">Your complete attendance record</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total Present</div><div class="stat-value">${totalPresent}</div><div class="stat-sub">Days recorded</div></div>
+      <div class="stat-card"><div class="stat-label">Late Arrivals</div><div class="stat-value" style="color:var(--warn)">${totalLate}</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-label">Attendance Rate</div><div class="stat-value">${attendRate}%</div><div class="stat-sub">Estimated</div></div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">14-Day Trend</div>
+      <div class="chart-area" style="height:180px"><canvas id="histChart" role="img" aria-label="14-day attendance trend">Attendance trend over last 14 days.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Attendance Log</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Time In</th><th>Status</th><th>Method</th></tr></thead>
+          <tbody>
+            ${monthRecs.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:var(--gray4);padding:2rem">No records yet</td></tr>' :
+              monthRecs.map(r => `<tr>
+                <td>${r.date}</td>
+                <td>${r.time}</td>
+                <td><span class="badge ${r.status==='late'?'badge-warn':'badge-success'}">${cap(r.status)}</span></td>
+                <td><span class="badge ${r.method==='admin'?'badge-blue':'badge-gray'}">${r.method==='admin'?'Admin Approved':'Self'}</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const last14 = allRecs.slice(0, 14).reverse();
+  new Chart(document.getElementById('histChart'), {
+    type: 'line',
+    data: {
+      labels: last14.map(r => r.date.slice(5)),
+      datasets: [{
+        data: last14.map(r => r.status==='late' ? 0.5 : 1),
+        borderColor: '#1a56db', backgroundColor: 'rgba(26,86,219,0.08)',
+        pointBackgroundColor: last14.map(r => r.status==='late'?'#c27803':'#0f9e5e'),
+        tension: 0.3, fill: true
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 1, ticks: { callback: v => v===1?'On Time':v===0.5?'Late':'' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderRequest(el) {
+  const today = todayStr();
+  const now = new Date();
+  const before = isBeforeCutoff(now);
+  const myReqs = DB.requests.filter(r => r.empId === currentUser.id).sort((a,b) => b.date.localeCompare(a.date));
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Request Attendance Approval</div>
+      <div class="page-subtitle">Submit a request when you missed the marking window</div>
+    </div>
+    ${before ? '<div class="window-bar">ℹ The attendance window is still open. You can still mark your attendance directly.</div>' : ''}
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">New Request</div>
+        <div class="req-form">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input class="form-input" type="date" id="req-date" value="${today}" max="${today}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason</label>
+            <textarea class="textarea" id="req-reason" placeholder="Briefly explain why you missed the attendance window..."></textarea>
+          </div>
+          <button class="btn-secondary" onclick="submitRequest()">Submit Request</button>
+          <div id="req-msg"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">My Requests</div>
+        ${myReqs.length === 0 ? '<div class="empty-state">No requests yet</div>' :
+          myReqs.map(r => `
+          <div class="req-card">
+            <div class="req-info">
+              <div class="req-name">${r.date}</div>
+              <div class="req-meta">Submitted: ${r.submitted}</div>
+              <div class="req-reason">${r.reason || 'No reason given'}</div>
+            </div>
+            <span class="badge ${r.status==='approved'?'badge-success':r.status==='rejected'?'badge-danger':'badge-warn'}">${cap(r.status)}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function submitRequest() {
+  const date = document.getElementById('req-date').value;
+  const reason = document.getElementById('req-reason').value.trim();
+  const msgEl = document.getElementById('req-msg');
+  if (!date) { msgEl.innerHTML = '<div class="auth-error">Please select a date.</div>'; return; }
+  const existing = DB.requests.find(r => r.empId === currentUser.id && r.date === date);
+  if (existing) { msgEl.innerHTML = '<div class="auth-error">A request for this date already exists.</div>'; return; }
+  DB.requests.push({
+    id: Date.now(), empId: currentUser.id, empName: currentUser.name,
+    date, reason, status: 'pending', submitted: new Date().toLocaleDateString('en-IN')
+  });
+  msgEl.innerHTML = '<div class="success-msg">✓ Request submitted successfully! The admin will review it shortly.</div>';
+  document.getElementById('req-reason').value = '';
+  buildSidebar();
+}
+
+/* ============================================================
+   ADMIN PAGES
+============================================================ */
+function renderAdminDashboard(el) {
+  const today = todayStr();
+  const employees = DB.employees.filter(e => e.role === 'employee');
+  const todayRecs = DB.attendance.filter(r => r.date === today);
+  const presentToday = todayRecs.filter(r => r.status === 'present').length;
+  const lateToday = todayRecs.filter(r => r.status === 'late').length;
+  const absentToday = employees.length - todayRecs.length;
+  const pendingReqs = DB.requests.filter(r => r.status === 'pending').length;
+  const weekDates = getWeekDates();
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Admin Dashboard</div>
+      <div class="page-subtitle">Attendance overview · ${fmtDateHuman(today)}</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Present Today</div><div class="stat-value" style="color:var(--success)">${presentToday}</div><div class="stat-sub">On time</div></div>
+      <div class="stat-card"><div class="stat-label">Late Today</div><div class="stat-value" style="color:var(--warn)">${lateToday}</div><div class="stat-sub">After 10:30 AM</div></div>
+      <div class="stat-card"><div class="stat-label">Absent Today</div><div class="stat-value" style="color:var(--danger)">${absentToday}</div><div class="stat-sub">Not marked</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Requests</div><div class="stat-value" style="color:var(--primary)">${pendingReqs}</div><div class="stat-sub">Awaiting review</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Today's Attendance Status</div>
+        <div style="position:relative;width:100%;height:220px"><canvas id="adminPieChart" role="img" aria-label="Today's attendance breakdown. Present: ${presentToday}, Late: ${lateToday}, Absent: ${absentToday}">Present: ${presentToday}, Late: ${lateToday}, Absent: ${absentToday}.</canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Weekly Summary (All Employees)</div>
+        <div style="position:relative;width:100%;height:220px"><canvas id="adminWeekChart" role="img" aria-label="Weekly attendance summary">Weekly attendance bars per day.</canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.25rem">
+      <div class="card-title">Today's Attendance Log</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Employee</th><th>Time In</th><th>Status</th></tr></thead>
+          <tbody>
+            ${employees.map(emp => {
+              const rec = getAttendance(emp.id, today);
+              return `<tr>
+                <td><div class="emp-row"><div class="emp-av">${initials(emp.name)}</div>${emp.name}</div></td>
+                <td>${rec ? rec.time : '<span style="color:var(--gray4)">—</span>'}</td>
+                <td>${rec ? `<span class="badge ${rec.status==='late'?'badge-warn':'badge-success'}">${cap(rec.status)}</span>` : '<span class="badge badge-danger">Absent</span>'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  new Chart(document.getElementById('adminPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Present','Late','Absent'],
+      datasets: [{ data: [presentToday, lateToday, absentToday], backgroundColor: ['#0f9e5e','#c27803','#e02424'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  const weekLabels = weekDates.map(d => { const dt=new Date(d+'T00:00:00'); return ['Su','Mo','Tu','We','Th','Fr','Sa'][dt.getDay()]; });
+  new Chart(document.getElementById('adminWeekChart'), {
+    type: 'bar',
+    data: {
+      labels: weekLabels,
+      datasets: [
+        { label:'Present', data: weekDates.map(d => DB.attendance.filter(r=>r.date===d&&r.status==='present').length), backgroundColor:'#0f9e5e', borderRadius:4 },
+        { label:'Late', data: weekDates.map(d => DB.attendance.filter(r=>r.date===d&&r.status==='late').length), backgroundColor:'#c27803', borderRadius:4 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid:{display:false} }, y: { stacked: true, beginAtZero:true } }, plugins: { legend: { position:'bottom' } } }
+  });
+}
+
+function renderAdminEmployees(el) {
+  const employees = DB.employees.filter(e => e.role === 'employee');
+  const weekDates = getWeekDates();
+
+  function render() {
+    const filtered = employees;
+    const tbody = document.getElementById('emp-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = filtered.map(emp => {
+      const weekRecs = weekDates.map(d => getAttendance(emp.id, d));
+      const present = weekRecs.filter(r=>r&&r.status!=='absent').length;
+      const late = weekRecs.filter(r=>r&&r.status==='late').length;
+      const todayRec = getAttendance(emp.id, todayStr());
+      return `<tr>
+        <td><div class="emp-row"><div class="emp-av">${initials(emp.name)}</div><div><div style="font-weight:500">${emp.name}</div><div style="font-size:11px;color:var(--gray4)">${emp.id}</div></div></div></td>
+        <td>${present}/${weekDates.length}</td>
+        <td>${late > 0 ? `<span class="badge badge-warn">${late} late</span>` : '<span class="badge badge-success">None</span>'}</td>
+        <td>${todayRec ? `<span class="badge ${todayRec.status==='late'?'badge-warn':'badge-success'}">${cap(todayRec.status)}</span>` : '<span class="badge badge-danger">Absent</span>'}</td>
+        <td><button onclick="viewEmployee('${emp.id}')" style="padding:5px 12px;border:1px solid var(--gray2);border-radius:6px;background:white;font-size:12px;cursor:pointer;color:var(--primary);">View →</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Employees</div>
+      <div class="page-subtitle">All employee attendance overview</div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Employee</th><th>This Week</th><th>Late (Week)</th><th>Today</th><th></th></tr></thead>
+          <tbody id="emp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  render();
+}
+
+window.viewEmployee = function(empId) {
+  const emp = DB.employees.find(e => e.id === empId);
+  if (!emp) return;
+  const allRecs = DB.attendance.filter(r => r.empId === empId).sort((a,b) => b.date.localeCompare(a.date));
+  const weekDates = getWeekDates();
+  const el = document.getElementById('page-content');
+  el.innerHTML = `
+    <div class="page-header" style="display:flex;align-items:center;gap:12px">
+      <button onclick="navigateTo('admin-employees')" style="padding:8px;border:1px solid var(--gray2);border-radius:8px;background:white;cursor:pointer;display:flex;align-items:center">
+        <svg width="16" height="16" fill="none" stroke="var(--gray6)" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div><div class="page-title">${emp.name}</div><div class="page-subtitle">${emp.id} · ${emp.dept}</div></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total Present</div><div class="stat-value">${allRecs.length}</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-label">Late Arrivals</div><div class="stat-value" style="color:var(--warn)">${allRecs.filter(r=>r.status==='late').length}</div><div class="stat-sub">All time</div></div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">Weekly Attendance Chart</div>
+      <div style="position:relative;width:100%;height:200px"><canvas id="empWeekChart" role="img" aria-label="Employee weekly attendance">Weekly attendance bars.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Attendance History</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Time In</th><th>Status</th><th>Method</th></tr></thead>
+          <tbody>${allRecs.map(r=>`<tr>
+            <td>${r.date}</td><td>${r.time}</td>
+            <td><span class="badge ${r.status==='late'?'badge-warn':'badge-success'}">${cap(r.status)}</span></td>
+            <td><span class="badge ${r.method==='admin'?'badge-blue':'badge-gray'}">${r.method==='admin'?'Admin':'Self'}</span></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  const last14 = allRecs.slice(0,14).reverse();
+  new Chart(document.getElementById('empWeekChart'), {
+    type: 'bar',
+    data: {
+      labels: last14.map(r=>r.date.slice(5)),
+      datasets: [{
+        data: last14.map(r=>r.status==='late'?0.5:1),
+        backgroundColor: last14.map(r=>r.status==='late'?'#c27803':'#0f9e5e'),
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false} },
+      scales: { y:{min:0,max:1,ticks:{callback:v=>v===1?'On Time':v===0.5?'Late':''}}, x:{grid:{display:false}} }
+    }
+  });
+};
+
+function renderAdminRequests(el) {
+  const pending = DB.requests.filter(r => r.status === 'pending');
+  const handled = DB.requests.filter(r => r.status !== 'pending').sort((a,b) => b.date.localeCompare(a.date));
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Attendance Requests</div>
+      <div class="page-subtitle">Review and approve employee attendance requests</div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">Pending Requests <span class="badge badge-warn" style="margin-left:6px">${pending.length}</span></div>
+      ${pending.length === 0 ? '<div class="empty-state">No pending requests 🎉</div>' :
+        pending.map(r => `
+        <div class="req-card" id="req-${r.id}">
+          <div class="emp-av" style="width:36px;height:36px;flex-shrink:0">${initials(r.empName)}</div>
+          <div class="req-info">
+            <div class="req-name">${r.empName} <span style="color:var(--gray4);font-weight:400">&middot; ${r.empId}</span></div>
+            <div class="req-meta">${r.dept} &bull; Requesting for: <strong>${r.date}</strong> &bull; Submitted: ${r.submitted}</div>
+            <div class="req-reason">"${r.reason || 'No reason provided'}"</div>
+          </div>
+          <div class="req-actions">
+            <button class="btn-approve" onclick="handleRequest(${r.id},'approved')">✓ Approve</button>
+            <button class="btn-reject" onclick="handleRequest(${r.id},'rejected')">✕ Reject</button>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">Handled Requests</div>
+      ${handled.length === 0 ? '<div class="empty-state">No handled requests yet</div>' :
+        handled.slice(0,10).map(r => `
+        <div class="req-card">
+          <div class="emp-av" style="width:36px;height:36px;flex-shrink:0">${initials(r.empName)}</div>
+          <div class="req-info">
+            <div class="req-name">${r.empName} <span style="color:var(--gray4);font-weight:400">&middot; ${r.date}</span></div>
+            <div class="req-reason">"${r.reason || '—'}"</div>
+          </div>
+          <span class="badge ${r.status==='approved'?'badge-success':'badge-danger'}">${cap(r.status)}</span>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+window.handleRequest = function(reqId, action) {
+  const req = DB.requests.find(r => r.id === reqId);
+  if (!req) return;
+  req.status = action;
+  if (action === 'approved') {
+    const existing = getAttendance(req.empId, req.date);
+    if (!existing) {
+      DB.attendance.push({ empId: req.empId, date: req.date, time: '10:30', status: 'late', method: 'admin' });
+    }
+  }
+  navigateTo('admin-requests');
+};
+
+function renderAdminReports(el) {
+  const employees = DB.employees.filter(e => e.role === 'employee');
+  const weekDates = getWeekDates();
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Reports & Analytics</div>
+      <div class="page-subtitle">Weekly attendance analysis and late arrival patterns</div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">Weekly Late Arrivals by Employee</div>
+      <div style="position:relative;width:100%;height:280px"><canvas id="lateChart" role="img" aria-label="Late arrivals per employee this week">Bar chart showing late arrivals by employee this week.</canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">Department Attendance Rate (This Week)</div>
+      <div style="position:relative;width:100%;height:250px"><canvas id="deptChart" role="img" aria-label="Department-wise attendance rate">Bar chart showing attendance rate by department.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Late Arrival Pattern — Daily</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Employee</th>${weekDates.map(d=>{const dt=new Date(d+'T00:00:00');return`<th>${['Su','Mo','Tu','We','Th','Fr','Sa'][dt.getDay()]} ${d.slice(5)}</th>`}).join('')}</tr></thead>
+          <tbody>
+            ${employees.map(emp => `<tr>
+              <td><div class="emp-row"><div class="emp-av">${initials(emp.name)}</div>${emp.name.split(' ')[0]}</div></td>
+              ${weekDates.map(d => {
+                const r = getAttendance(emp.id, d);
+                if (!r) return '<td style="text-align:center;color:var(--gray4)">—</td>';
+                return `<td style="text-align:center"><span class="badge ${r.status==='late'?'badge-warn':'badge-success'}" style="font-size:10px">${r.status==='late'?'Late':'✓'}</span></td>`;
+              }).join('')}
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const empNames = employees.map(e => e.name.split(' ')[0]);
+  const lateCounts = employees.map(emp => weekDates.filter(d => { const r=getAttendance(emp.id,d); return r&&r.status==='late'; }).length);
+  new Chart(document.getElementById('lateChart'), {
+    type: 'bar',
+    data: {
+      labels: empNames,
+      datasets: [{ label:'Late Days', data: lateCounts, backgroundColor: lateCounts.map(v=>v>2?'#e02424':v>0?'#c27803':'#0f9e5e'), borderRadius:6 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true,ticks:{stepSize:1}} } }
+  });
+
+  const depts = [...new Set(employees.map(e=>e.dept))];
+  const deptRates = depts.map(dept => {
+    const emps = employees.filter(e=>e.dept===dept);
+    const total = emps.length * weekDates.length;
+    const present = emps.reduce((s,emp)=>s+weekDates.filter(d=>getAttendance(emp.id,d)).length,0);
+    return total ? Math.round((present/total)*100) : 0;
+  });
+  new Chart(document.getElementById('deptChart'), {
+    type: 'bar',
+    data: { labels:depts, datasets:[{ label:'Attendance %', data:deptRates, backgroundColor:'#1a56db', borderRadius:6 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}} } }
+  });
+}
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+}
+function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+function fmtDateHuman(d) {
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+</script>
+</body>
+</html>
