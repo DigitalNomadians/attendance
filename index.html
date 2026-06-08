@@ -221,11 +221,36 @@
   .filter-select { padding: 6px 10px; border: 1px solid var(--gray2); border-radius: 6px; font-family: var(--font); font-size: 13px; color: var(--gray7); background: white; cursor: pointer; }
   .today-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
   .window-bar { background: var(--warn-light); border: 1px solid #fcd97a; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--warn); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
+    .main-layout { flex-direction: column; }
+    .sidebar { width: 100%; position: relative; top: 0; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 0.75rem; }
+    .nav-item { justify-content: center; }
+    .topbar { padding: 0 1rem; }
+    .topbar-right { flex-wrap: wrap; gap: 8px; }
+    .page { padding: 1.25rem; }
     .grid-2 { grid-template-columns: 1fr; }
-    .sidebar { width: 180px; }
-    .page { padding: 1rem; }
+    .chart-area { height: 200px; }
+  }
+  @media (max-width: 600px) {
+    #auth-screen { padding: 1rem; }
+    .auth-card { padding: 1.5rem; }
+    .auth-logo { flex-wrap: wrap; gap: 8px; }
+    .auth-tabs { flex-direction: column; }
+    .topbar { padding: 0 0.75rem; }
+    .topbar-right { gap: 6px; }
+    .topbar-user { gap: 6px; }
+    .sidebar { padding: 0.5rem; }
+    .nav-item { width: calc(50% - 8px); }
+    .page { padding: 0.9rem; }
+    .card { padding: 1rem; }
+    .attend-widget { padding: 1.5rem; }
     .attend-time { font-size: 32px; }
+    .chart-area { height: 180px; }
+    .table-wrap { overflow-x: auto; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
+    .req-card { flex-direction: column; align-items: stretch; }
+    .filter-row { gap: 6px; }
   }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
