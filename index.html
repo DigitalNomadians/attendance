@@ -96,6 +96,11 @@
   }
   .topbar-brand-name { font-size: 15px; font-weight: 700; color: var(--gray8); }
   .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-toggle {
+    display: none; border: none; background: transparent; color: var(--gray7); cursor: pointer;
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .topbar-toggle svg { width: 22px; height: 22px; }
   .topbar-clock { font-size: 13px; font-weight: 600; color: var(--gray6); background: var(--gray1); padding: 5px 12px; border-radius: 20px; }
   .topbar-user { display: flex; align-items: center; gap: 8px; }
   .user-avatar {
@@ -223,10 +228,17 @@
   .window-bar { background: var(--warn-light); border: 1px solid #fcd97a; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--warn); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
   @media (max-width: 900px) {
     .main-layout { flex-direction: column; }
-    .sidebar { width: 100%; position: relative; top: 0; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 0.75rem; }
-    .nav-item { justify-content: center; }
+    .sidebar {
+      width: 100%; position: absolute; left: 0; right: 0; top: 56px;
+      max-height: 0; overflow: hidden; border-right: none; border-bottom: 1px solid var(--border);
+      background: white; padding: 0; transition: max-height 0.2s ease;
+      z-index: 120;
+    }
+    .sidebar.open { max-height: calc(100vh - 56px); overflow-y: auto; padding: 0.75rem; }
+    .sidebar .nav-item { width: 100%; }
     .topbar { padding: 0 1rem; }
     .topbar-right { flex-wrap: wrap; gap: 8px; }
+    .topbar-toggle { display: inline-flex; }
     .page { padding: 1.25rem; }
     .grid-2 { grid-template-columns: 1fr; }
     .chart-area { height: 200px; }
@@ -239,8 +251,6 @@
     .topbar { padding: 0 0.75rem; }
     .topbar-right { gap: 6px; }
     .topbar-user { gap: 6px; }
-    .sidebar { padding: 0.5rem; }
-    .nav-item { width: calc(50% - 8px); }
     .page { padding: 0.9rem; }
     .card { padding: 1rem; }
     .attend-widget { padding: 1.5rem; }
@@ -291,6 +301,9 @@
 <!-- Main App -->
 <div id="app" style="display:none; flex-direction:column;">
   <div class="topbar">
+    <button class="topbar-toggle" onclick="toggleMobileSidebar()" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+    </button>
     <div class="topbar-brand">
       <div class="topbar-brand-icon">
         <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
@@ -523,6 +536,15 @@ function navigateTo(page) {
   };
   pc.innerHTML = '';
   if (pages[page]) pages[page](pc);
+  if (window.innerWidth <= 900) closeMobileSidebar();
+}
+
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
 }
 
 /* ============================================================
